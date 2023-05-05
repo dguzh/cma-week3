@@ -1,0 +1,49 @@
+---
+title: "week3-rexercise"
+format: html
+editor: visual
+---
+
+## Task 1
+
+```{r}
+library('readr')
+library('dplyr')
+library('ggplot2')
+
+wildschwein <- read_csv('data/wildschwein_BE_2056.csv')
+
+sabi <- wildschwein |>
+  filter(TierName == 'Sabi') |>
+  filter(DatetimeUTC >= as.POSIXct('2015-07-01', tz = 'UTC'), DatetimeUTC < as.POSIXct('2015-07-03', tz = 'UTC'))
+
+sabi <- sabi |>
+    mutate(
+        nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2), # distance to pos -30 minutes
+        nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2), # distance to pos -15 minutes
+        nPlus1  = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2), # distance to pos +15 mintues
+        nPlus2  = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2) # distance to pos +30 minutes
+    )
+
+sabi <- sabi |>
+    rowwise() |>
+    mutate(
+        stepMean = mean(c(nMinus2, nMinus1, nPlus1, nPlus2))
+    ) |>
+    ungroup()
+
+sabi <- sabi |>
+    ungroup() |>
+    mutate(static = stepMean < mean(stepMean, na.rm = TRUE))
+
+sabi_filter <- sabi |>
+    filter(!static)
+
+sabi_filter |>
+    ggplot(aes(E, N)) +
+    geom_path() +
+    geom_point() +
+    coord_fixed() +
+    theme(legend.position = "bottom")
+```
+
