@@ -152,3 +152,17 @@ posmo |>
     coord_equal() +
     labs(title = "Long Segments (> 5 Minutes)")
 ```
+
+## Task 5
+
+```{r}
+pedestrian <- read_csv("data/pedestrian.csv")
+
+pedestrian |>
+  ggplot(aes(E, N, color = factor(TrajID))) +
+  geom_path() +
+  geom_point() +
+  facet_wrap(~ TrajID) +
+  coord_equal()
+```
+
