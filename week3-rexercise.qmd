@@ -112,3 +112,13 @@ posmo <- posmo |>
     mutate(static = stepMean < mean(stepMean, na.rm = TRUE))
 ```
 
+## Task 3
+
+```{r}
+posmo |>
+    ggplot(aes(X, Y, color = static)) +
+    geom_path() +
+    geom_point() +
+    coord_equal()
+```
+
