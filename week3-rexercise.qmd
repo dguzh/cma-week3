@@ -122,3 +122,33 @@ posmo |>
     coord_equal()
 ```
 
+## Task 4
+
+```{r}
+rle_id <- function(vec) {
+    x <- rle(vec)$lengths
+    as.factor(rep(seq_along(x), times = x))
+}
+
+posmo <- posmo |>
+    mutate(segment_id = rle_id(static))
+
+posmo |>
+    ggplot(aes(X, Y, color = segment_id)) +
+    geom_path() +
+    geom_point() +
+    coord_equal() +
+    labs(title = "All Segments")
+
+posmo <- posmo |>
+  group_by(segment_id) |>
+  mutate(duration = max(datetime) - min(datetime))
+
+posmo |>
+    filter(duration >= as.difftime(5, units = "mins")) |>
+    ggplot(aes(X, Y, color = segment_id)) +
+    geom_path() +
+    geom_point() +
+    coord_equal() +
+    labs(title = "Long Segments (> 5 Minutes)")
+```
