@@ -166,3 +166,42 @@ pedestrian |>
   coord_equal()
 ```
 
+## Task 6
+
+```{r}
+# First thoughts:
+# 1 & 6 look pretty much identical, even with same spacings between fixes.
+# If we only consider the general shape, we can say that 1, 2, 3 & 6 all look similar
+# to each other. 5 could also be considered similar, but has one outlier far off the
+# path that all others have. 6 is the only one, that looks distinctly different to the others.
+
+library(SimilarityMeasures)
+
+# create a list of data frames, one for each trajectory
+trajectories <- split(pedestrian, pedestrian$TrajID)
+
+# turn each of the data frames into a matrix
+trajectories <- lapply(trajectories, function(df) as.matrix(df[, c("E", "N")]))
+
+# compute the similarity metric between trajectory 1 and each of the other trajectories (except 1)
+similarities_DTW <- sapply(trajectories[-1], function(traj) DTW(trajectories[[1]], traj))
+similarities_EditDist <- sapply(trajectories[-1], function(traj) EditDist(trajectories[[1]], traj))
+similarities_Frechet  <- sapply(trajectories[-1], function(traj) Frechet(trajectories[[1]], traj))
+similarities_LCSS <- sapply(trajectories[-1], function(traj) {LCSS(trajectories[[1]], traj, pointSpacing = 5, pointDistance = 5, errorMarg = 0.5)})
+
+# turn results into data frames
+df_DTW <- data.frame(Trajectory = names(similarities_DTW), Similarity = similarities_DTW, Measure = "DTW")
+df_EditDist <- data.frame(Trajectory = names(similarities_EditDist), Similarity = similarities_EditDist, Measure = "EditDist")
+df_Frechet <- data.frame(Trajectory = names(similarities_Frechet), Similarity = similarities_Frechet, Measure = "Frechet")
+df_LCSS <- data.frame(Trajectory = names(similarities_LCSS), Similarity = similarities_LCSS, Measure = "LCSS")
+
+# merge data frames
+df_similarities <- bind_rows(df_DTW, df_EditDist, df_Frechet, df_LCSS)
+
+# plot
+ggplot(df_similarities, aes(x = Trajectory, y = Similarity, fill = Trajectory)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ Measure, scales = "free") +
+  labs(x = "Trajectory", y = "Similarity", title = "Similarity Measures of Trajectories 2-6 to Trajectory 1") +
+  theme(legend.position = "none")
+```
