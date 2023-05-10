@@ -66,7 +66,7 @@ posmo_coordinates <- st_coordinates(posmo)
 posmo <- cbind(posmo, posmo_coordinates)
 
 posmo <- posmo |>
-    filter(as.Date(datetime) == "2023-04-28")
+    filter(as.Date(datetime) == "2023-04-21")
 ```
 
 ## Task 1
@@ -74,10 +74,10 @@ posmo <- posmo |>
 ```{r}
 posmo <- posmo |>
     mutate(
-        nMinus2 = sqrt((lag(X, 2) - X)^2 + (lag(Y, 2) - Y)^2), # distance to pos -30 minutes
-        nMinus1 = sqrt((lag(X, 1) - X)^2 + (lag(Y, 1) - Y)^2), # distance to pos -15 minutes
-        nPlus1  = sqrt((X - lead(X, 1))^2 + (Y - lead(Y, 1))^2), # distance to pos +15 mintues
-        nPlus2  = sqrt((X - lead(X, 2))^2 + (Y - lead(Y, 2))^2) # distance to pos +30 minutes
+        nMinus2 = sqrt((lag(X, 2) - X)^2 + (lag(Y, 2) - Y)^2),
+        nMinus1 = sqrt((lag(X, 1) - X)^2 + (lag(Y, 1) - Y)^2),
+        nPlus1  = sqrt((X - lead(X, 1))^2 + (Y - lead(Y, 1))^2),
+        nPlus2  = sqrt((X - lead(X, 2))^2 + (Y - lead(Y, 2))^2)
     )
 
 posmo <- posmo |>
@@ -100,5 +100,15 @@ posmo_filter |>
     geom_point() +
     coord_fixed() +
     theme(legend.position = "bottom")
+```
+
+## Task 2
+
+```{r}
+# this is what we did with Sabi, which is why I implemented it in task 1 already;
+# here I copy the code from above, because for some reason it is asked for again in task 2
+posmo <- posmo |>
+    ungroup() |>
+    mutate(static = stepMean < mean(stepMean, na.rm = TRUE))
 ```
 
